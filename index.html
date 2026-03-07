@@ -1277,70 +1277,109 @@
                 const pulse = Math.sin(Date.now() / 400);
                 const pulseFast = Math.sin(Date.now() / 150);
 
-                // Sky Gradients (Deep Nebula)
+                // 1. Cinematic Sky (Deep Atmospheric Gradient)
                 const grad = ctx.createLinearGradient(0, 0, 0, height);
-                grad.addColorStop(0, '#050614');
-                grad.addColorStop(0.5, '#120a2e');
-                grad.addColorStop(1, '#2e113a');
+                grad.addColorStop(0, '#02030a');
+                grad.addColorStop(0.4, '#080a1a');
+                grad.addColorStop(0.8, '#1a102e');
+                grad.addColorStop(1, '#250c26');
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, width, height);
 
-                // Animated Nebula Clouds
-                ctx.globalAlpha = 0.2 + pulse * 0.05;
-                for (let i = 0; i < 3; i++) {
-                    const x = (Date.now() / 100 * (i + 1)) % (width * 2) - width;
-                    ctx.fillStyle = i % 2 === 0 ? '#ff0055' : '#00f2ff';
-                    ctx.beginPath();
-                    ctx.ellipse(x, 150 + i * 50, 400 + pulse * 50, 200, 0, 0, Math.PI * 2);
-                    ctx.fill();
+                // 2. Far Nebula / Smog Glow
+                ctx.globalAlpha = 0.15;
+                for (let i = 0; i < 2; i++) {
+                    const x = (Date.now() / 200 * (i + 1)) % (width * 1.5) - width/2;
+                    const g = ctx.createRadialGradient(x, 200, 0, x, 200, 500);
+                    g.addColorStop(0, i % 2 === 0 ? '#ff00aa' : '#00aaff');
+                    g.addColorStop(1, 'transparent');
+                    ctx.fillStyle = g;
+                    ctx.fillRect(0, 0, width, height);
                 }
                 ctx.globalAlpha = 1.0;
 
-                // Stars (Distant/Slow Parallax)
+                // 3. Stars (Atmospheric twinkling)
                 ctx.fillStyle = '#fff';
-                for (let i = 0; i < 120; i++) {
-                    const x = (i * 203 + Date.now() / 200) % width;
-                    const y = (i * 77) % 400;
-                    ctx.globalAlpha = 0.2 + (Math.random() > 0.9 ? pulseFast * 0.3 : 0.2);
-                    ctx.fillRect(x, y, 1, 1);
+                for (let i = 0; i < 80; i++) {
+                    const x = (i * 203) % width;
+                    const y = (i * 77) % 350;
+                    const s = Math.random() * 1.5;
+                    ctx.globalAlpha = 0.1 + Math.random() * 0.4;
+                    ctx.fillRect(x, y, s, s);
                 }
 
-                // Cyberpunk City Skyline (Medium Parallax)
-                ctx.fillStyle = '#0a0a1a';
-                const sOffset = this.p1.pos.x * 0.08;
-                for (let i = 0; i < 10; i++) {
-                    const x = (i * 150 - sOffset) % (width + 150) - 75;
-                    const h = 100 + (i * 20 % 150);
-                    ctx.fillRect(x, height - h - 60, 80, h);
-                    
-                    // Pulsing Neon Lights
-                    ctx.globalAlpha = 0.4 + pulseFast * 0.2;
-                    ctx.fillStyle = i % 2 === 0 ? '#00f2ff' : '#ff0055';
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = ctx.fillStyle;
-                    ctx.fillRect(x + 10, height - h - 50, 15, 15);
-                    ctx.fillRect(x + 55, height - h + 30, 15, 15);
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = '#0a0a1a';
-                    ctx.globalAlpha = 1.0;
-                }
-
-                // Foreground Pillars (Fast Parallax)
+                // 4. Distant "Neo-Tokyo" Skyline (Level 1)
+                const sOffset = this.p1.pos.x * 0.05;
                 ctx.fillStyle = '#050510';
-                const pOffset = this.p1.pos.x * 0.2;
-                for (let i = 0; i < 8; i++) {
-                    const x = (i * 300 - pOffset) % (width + 300) - 150;
-                    ctx.fillRect(x, 0, 40, height);
+                for (let i = -2; i < 12; i++) {
+                    const x = i * 120 - sOffset;
+                    const h = 150 + (i * 67 % 100);
                     
-                    // High-quality Neon Strip
+                    // Skyscraper shape
+                    ctx.fillRect(x, height - h - 60, 100, h);
+                    
+                    // Pagoda roof tops for Japan feel
+                    if (i % 3 === 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(x - 10, height - h - 60);
+                        ctx.lineTo(x + 110, height - h - 60);
+                        ctx.lineTo(x + 50, height - h - 85);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+
+                    // Windows
+                    ctx.globalAlpha = 0.3 + pulse * 0.1;
+                    ctx.fillStyle = i % 2 === 0 ? '#00f2ff' : '#ff0055';
+                    for (let wx = 0; wx < 3; wx++) {
+                        for (let wy = 0; wy < h/20; wy++) {
+                            if ((wx + wy + i) % 4 === 0) {
+                                ctx.fillRect(x + 15 + wx * 25, height - h - 45 + wy * 15, 6, 4);
+                            }
+                        }
+                    }
+                    ctx.globalAlpha = 1.0;
+                    ctx.fillStyle = '#050510';
+                }
+
+                // 5. Atmospheric Fog Layer
+                const fog = ctx.createLinearGradient(0, height - 200, 0, height - 60);
+                fog.addColorStop(0, 'transparent');
+                fog.addColorStop(1, 'rgba(10, 11, 30, 0.8)');
+                ctx.fillStyle = fog;
+                ctx.fillRect(0, height - 200, width, 140);
+
+                // 6. Foreground Pillars & Torii Elements (Level 2)
+                const pOffset = this.p1.pos.x * 0.15;
+                for (let i = -1; i < 6; i++) {
+                    const x = i * 350 - pOffset;
+                    
+                    // High-tech Torii Pillar
+                    ctx.fillStyle = '#030308';
+                    ctx.fillRect(x, 0, 30, height);
+                    ctx.fillRect(x + 80, 0, 30, height); 
+                    
+                    // Cross bar
+                    ctx.fillRect(x - 20, 100, 150, 20);
+                    
+                    // Neon strip
                     const neonColor = i % 2 === 0 ? 'var(--neon-azure)' : 'var(--neon-crimson)';
                     ctx.fillStyle = neonColor;
-                    ctx.globalAlpha = 0.2 + pulseFast * 0.1;
                     ctx.shadowBlur = 15;
                     ctx.shadowColor = neonColor;
-                    ctx.fillRect(x + 15, 0, 10, height);
+                    ctx.globalAlpha = 0.6 + pulseFast * 0.2;
+                    ctx.fillRect(x + 12, 0, 6, height);
+                    ctx.fillRect(x + 92, 0, 6, height);
+                    
+                    // Kanji-style Neon Sign (Simplified)
+                    if (i % 2 === 0) {
+                        ctx.fillRect(x + 40, 150, 30, 60);
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '20px Orbitron';
+                        ctx.fillText('侍', x + 45, 190); 
+                    }
+
                     ctx.shadowBlur = 0;
-                    ctx.fillStyle = '#050510';
                     ctx.globalAlpha = 1.0;
                 }
             },
